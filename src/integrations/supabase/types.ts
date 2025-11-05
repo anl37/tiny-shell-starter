@@ -63,6 +63,8 @@ export type Database = {
           avg_dwell_min: number
           created_at: string
           day_type: string
+          frequency_denominator: number | null
+          frequency_numerator: number | null
           frequency_share: number
           id: string
           last_visit_at: string | null
@@ -82,6 +84,8 @@ export type Database = {
           avg_dwell_min?: number
           created_at?: string
           day_type: string
+          frequency_denominator?: number | null
+          frequency_numerator?: number | null
           frequency_share?: number
           id?: string
           last_visit_at?: string | null
@@ -101,6 +105,8 @@ export type Database = {
           avg_dwell_min?: number
           created_at?: string
           day_type?: string
+          frequency_denominator?: number | null
+          frequency_numerator?: number | null
           frequency_share?: number
           id?: string
           last_visit_at?: string | null
@@ -455,6 +461,60 @@ export type Database = {
         }
         Relationships: []
       }
+      place_enrichment_queue: {
+        Row: {
+          created_at: string | null
+          id: string
+          last_attempt_at: string | null
+          lat: number
+          lng: number
+          retry_count: number | null
+          session_id: string | null
+          status: string | null
+          user_id: string | null
+          visit_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          last_attempt_at?: string | null
+          lat: number
+          lng: number
+          retry_count?: number | null
+          session_id?: string | null
+          status?: string | null
+          user_id?: string | null
+          visit_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          last_attempt_at?: string | null
+          lat?: number
+          lng?: number
+          retry_count?: number | null
+          session_id?: string | null
+          status?: string | null
+          user_id?: string | null
+          visit_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "place_enrichment_queue_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "location_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "place_enrichment_queue_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "location_visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       presence: {
         Row: {
           geohash: string
@@ -539,8 +599,146 @@ export type Database = {
         }
         Relationships: []
       }
+      suggested_matches: {
+        Row: {
+          action: string | null
+          action_at: string | null
+          behavioral_overlap: Json | null
+          compatibility_score: number
+          created_at: string | null
+          id: string
+          match_reason: string | null
+          shared_interests: string[] | null
+          shown_at: string | null
+          suggested_user_id: string
+          user_id: string
+        }
+        Insert: {
+          action?: string | null
+          action_at?: string | null
+          behavioral_overlap?: Json | null
+          compatibility_score?: number
+          created_at?: string | null
+          id?: string
+          match_reason?: string | null
+          shared_interests?: string[] | null
+          shown_at?: string | null
+          suggested_user_id: string
+          user_id: string
+        }
+        Update: {
+          action?: string | null
+          action_at?: string | null
+          behavioral_overlap?: Json | null
+          compatibility_score?: number
+          created_at?: string | null
+          id?: string
+          match_reason?: string | null
+          shared_interests?: string[] | null
+          shown_at?: string | null
+          suggested_user_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      suggestion_actions: {
+        Row: {
+          action: string
+          action_at: string | null
+          context: Json | null
+          id: string
+          suggestion_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          action_at?: string | null
+          context?: Json | null
+          id?: string
+          suggestion_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          action_at?: string | null
+          context?: Json | null
+          id?: string
+          suggestion_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suggestion_actions_suggestion_id_fkey"
+            columns: ["suggestion_id"]
+            isOneToOne: false
+            referencedRelation: "suggested_matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suggestion_impressions: {
+        Row: {
+          id: string
+          scroll_depth_percent: number | null
+          suggestion_id: string | null
+          user_id: string
+          view_duration_seconds: number | null
+          viewed_at: string | null
+        }
+        Insert: {
+          id?: string
+          scroll_depth_percent?: number | null
+          suggestion_id?: string | null
+          user_id: string
+          view_duration_seconds?: number | null
+          viewed_at?: string | null
+        }
+        Update: {
+          id?: string
+          scroll_depth_percent?: number | null
+          suggestion_id?: string | null
+          user_id?: string
+          view_duration_seconds?: number | null
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suggestion_impressions_suggestion_id_fkey"
+            columns: ["suggestion_id"]
+            isOneToOne: false
+            referencedRelation: "suggested_matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
+      mv_activity_summaries_with_recency: {
+        Row: {
+          avg_dwell_min: number | null
+          computed_recency_score: number | null
+          created_at: string | null
+          day_type: string | null
+          days_ago: number | null
+          frequency_denominator: number | null
+          frequency_numerator: number | null
+          frequency_share: number | null
+          id: string | null
+          last_visit_at: string | null
+          place_type: string | null
+          recency_score: number | null
+          summary_date: string | null
+          time_of_day: string | null
+          time_window: string | null
+          total_dwell_min: number | null
+          updated_at: string | null
+          user_id: string | null
+          visit_count: number | null
+          window_end_min: number | null
+          window_start_min: number | null
+        }
+        Relationships: []
+      }
       vw_activity_summaries_pretty: {
         Row: {
           avg_dwell_min: number | null
@@ -607,6 +805,53 @@ export type Database = {
         }
         Relationships: []
       }
+      vw_compatibility_weights_normalized: {
+        Row: {
+          behavior_weight: number | null
+          behavior_weight_normalized: number | null
+          data_points_count: number | null
+          feedback_weight: number | null
+          feedback_weight_normalized: number | null
+          interest_weight: number | null
+          interest_weight_normalized: number | null
+          updated_at: string | null
+          user_id: string | null
+          weight_sum_deviation: number | null
+        }
+        Insert: {
+          behavior_weight?: number | null
+          behavior_weight_normalized?: never
+          data_points_count?: number | null
+          feedback_weight?: number | null
+          feedback_weight_normalized?: never
+          interest_weight?: number | null
+          interest_weight_normalized?: never
+          updated_at?: string | null
+          user_id?: string | null
+          weight_sum_deviation?: never
+        }
+        Update: {
+          behavior_weight?: number | null
+          behavior_weight_normalized?: never
+          data_points_count?: number | null
+          feedback_weight?: number | null
+          feedback_weight_normalized?: never
+          interest_weight?: number | null
+          interest_weight_normalized?: never
+          updated_at?: string | null
+          user_id?: string | null
+          weight_sum_deviation?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compatibility_weights_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       cleanup_stale_presence: { Args: never; Returns: number }
@@ -626,10 +871,15 @@ export type Database = {
           start_min: number
         }[]
       }
+      process_place_enrichment_queue: {
+        Args: { batch_size?: number; max_retries?: number }
+        Returns: number
+      }
       recalculate_frequency_scores: {
         Args: { target_user_id: string }
         Returns: undefined
       }
+      refresh_activity_recency: { Args: never; Returns: undefined }
       sessionize_recent_visits: {
         Args: { gap_threshold_minutes?: number; target_user_id: string }
         Returns: number
@@ -637,6 +887,10 @@ export type Database = {
       time_of_day_category: { Args: { local_ts: string }; Returns: string }
       time_of_day_label: { Args: { local_ts: string }; Returns: string }
       two_hour_bucket: { Args: { local_ts: string }; Returns: string }
+      update_activity_patterns_from_sessions: {
+        Args: { lookback_days?: number; target_user_id?: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
