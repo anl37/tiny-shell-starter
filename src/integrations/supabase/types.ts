@@ -880,10 +880,19 @@ export type Database = {
         Returns: undefined
       }
       refresh_activity_recency: { Args: never; Returns: undefined }
-      sessionize_recent_visits: {
-        Args: { gap_threshold_minutes?: number; target_user_id: string }
-        Returns: number
-      }
+      sessionize_recent_visits:
+        | {
+            Args: { gap_threshold_minutes?: number; target_user_id: string }
+            Returns: number
+          }
+        | {
+            Args: {
+              gap_threshold_minutes?: number
+              lookback_hours?: number
+              target_user_id?: string
+            }
+            Returns: number
+          }
       time_of_day_category: { Args: { local_ts: string }; Returns: string }
       time_of_day_label: { Args: { local_ts: string }; Returns: string }
       two_hour_bucket: { Args: { local_ts: string }; Returns: string }
@@ -896,7 +905,22 @@ export type Database = {
       [_ in never]: never
     }
     CompositeTypes: {
-      [_ in never]: never
+      session_state: {
+        user_id: string | null
+        place_id: string | null
+        place_name: string | null
+        place_type: string | null
+        lat: number | null
+        lng: number | null
+        geohash: string | null
+        start_ts: string | null
+        visited_at: string | null
+        confidence: number | null
+        user_timezone_at_event: string | null
+        time_window: string | null
+        time_of_day: string | null
+        day_type: string | null
+      }
     }
   }
 }

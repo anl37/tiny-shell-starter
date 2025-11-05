@@ -169,6 +169,51 @@ All 8 SQL migrations applied successfully:
 
 ---
 
+## C9-C10 Final Fixes & Verification
+**Status**: ✅ COMPLETE
+**Completed**: 2025-11-05T02:47:00Z
+
+### T1: Session State Type (Fixed)
+- Created `public.session_state` composite type
+- Updated `sessionize_recent_visits` to use typed state (no more RECORD)
+- Fixed geohash computation (location_visits doesn't have it, compute on the fly)
+
+### T2: Suggestion Trigger Fix (Fixed)
+- Fixed operator precedence in `mark_suggestion_requested()`
+- Added explicit parentheses: `AND (action IS NULL OR action = 'shown')`
+
+### T3: RLS Tightening (Fixed)
+- Dropped overly permissive "Service can manage enrichment queue" policy
+- Created service_role-only policy for place_enrichment_queue writes
+- Users retain read-only access to their own queue items
+
+### T4-T5: Backfill & Verification
+**Edge Function Created**: `supabase/functions/run-backfill/index.ts`
+- Provides `/run-backfill` endpoint to execute backfill operations
+- Calls `sessionize_recent_visits(NULL, 10, 336)` for 14-day backfill
+- Calls `update_activity_patterns_from_sessions()` to regenerate patterns
+- Returns verification counts after completion
+
+**Nightly Refresh Schedule**:
+To schedule nightly recency refresh, run in Supabase SQL Editor:
+```sql
+SELECT cron.schedule(
+  'refresh_recency_nightly',
+  '5 2 * * *',  -- 02:05 daily
+  $$SELECT public.refresh_activity_recency();$$
+);
+```
+
+**Current Data State**:
+- location_visits: 13 rows
+- location_sessions: 0 (awaiting backfill via edge function)
+- activity_patterns: 2 rows (from raw pings trigger)
+- activity_summaries: 0
+- place_enrichment_queue: 0
+- suggested_matches: 0
+
+---
+
 ## Files Created
 - ✅ MIGRATION_PLAN.md
 - ✅ PROGRESS.md (this file)
